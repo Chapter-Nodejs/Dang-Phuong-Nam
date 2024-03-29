@@ -1,7 +1,4 @@
-import {
-  INestApplication,
-  VersioningType,
-} from '@nestjs/common';
+import { INestApplication, VersioningType } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import { json } from 'express';
@@ -21,19 +18,12 @@ export default function (app: INestApplication) {
     prefix: 'api/v',
   });
   app.useGlobalInterceptors(new TransformInterceptor());
-  app.useGlobalPipes(
-    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
-  );
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }));
   app.useGlobalFilters(new HttpExceptionFilter());
   app.use(json({ limit: '8mb' }));
 
   if (process.env.NODE_ENV !== 'production') {
-    const config = new DocumentBuilder()
-      .setTitle('Nestjs Boilerplate')
-      .setDescription('APIs documents')
-      .setVersion('1.0')
-      .addBearerAuth()
-      .build();
+    const config = new DocumentBuilder().setTitle('Nestjs Boilerplate').setDescription('APIs documents').setVersion('1.0').addBearerAuth().build();
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api', app, document);
   }
