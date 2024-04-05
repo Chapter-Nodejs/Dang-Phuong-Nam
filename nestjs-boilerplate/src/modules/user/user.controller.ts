@@ -1,3 +1,4 @@
+import { TaskDynamicService } from './../../share/tasks/testCronJob.service';
 import { IResponseList } from '@/share/common/app.interface';
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -14,11 +15,16 @@ import { UserService } from './user.service';
 @ApiTags('User')
 @ApiBearerAuth()
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private taskDynamicService: TaskDynamicService,
+  ) {}
 
   @Post()
   async createUser(@Body() body: CreateUserDto): Promise<UserDocument> {
-    return this.userService.createUser(body);
+    const user = await this.userService.createUser(body);
+    this.taskDynamicService.createUserJob(user.name);
+    return user;
   }
 
   @Get(':id')

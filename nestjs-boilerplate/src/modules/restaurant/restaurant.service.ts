@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Restaurant, RestaurantDocument } from './restaurant.model';
 import { Model } from 'mongoose';
@@ -25,6 +25,7 @@ export class RestaurantService {
     const page = params.page && params.page > 0 ? Number(params.page) : 1;
     const pageSize = params.pageSize && params.pageSize > 0 ? Number(params.pageSize) : 10;
     const conditions: any = {};
+    const sortOption: any = {};
     if (params.search) {
       // can search by name || address || phone('i' is for case-insensitive search)
       conditions.$or = [
@@ -33,11 +34,14 @@ export class RestaurantService {
         { phone: { $regex: new RegExp(params.search, 'i') } },
       ];
     }
+    if (params?.sortBy) {
+      sortOption[params.sortBy] = params.sortOrder === 'desc' ? -1 : 1;
+    }
     const results = await this.restaurantModel.aggregate([
       {
         $facet: {
           // $match: filter documents by conditions -> $skip: filter documents by page -> $limit: limit the number of documents by pageSize
-          documents: [{ $match: conditions }, { $skip: (page - 1) * pageSize }, { $limit: pageSize }],
+          documents: [{ $match: conditions }, { $skip: (page - 1) * pageSize }, { $limit: pageSize }, { $sort: sortOption }],
           // total count of documents after filtering
           totalCount: [{ $count: 'count' }],
         },
@@ -57,12 +61,18 @@ export class RestaurantService {
   }
 
   async updateRestaurant(id: string, data: any): Promise<RestaurantDocument> {
-    const restaurant = await this.restaurantModel.findOneAndUpdate({ _id: id }, data, { new: true });
-    return restaurant;
+    const restaurantCurrent = await this.getRestaurant(id);
+    if (!restaurantCurrent) {
+      throw new HttpException('Restaurant not found', HttpStatus.NOT_FOUND);
+    }
+    return this.restaurantModel.findOneAndUpdate({ _id: id }, { $set: data }, { new: true });
   }
 
   async deleteRestaurant(id: string): Promise<RestaurantDocument> {
-    const restaurant = await this.restaurantModel.findOneAndDelete({ _id: id });
-    return restaurant;
+    const restaurantCurrent = await this.getRestaurant(id);
+    if (!restaurantCurrent) {
+      throw new HttpException('Restaurant not found', HttpStatus.NOT_FOUND);
+    }
+    return this.restaurantModel.findOneAndDelete({ _id: id });
   }
 }

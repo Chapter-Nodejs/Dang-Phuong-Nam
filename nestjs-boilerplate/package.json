@@ -38,6 +38,7 @@
     "@nestjs/jwt": "^10.2.0",
     "@nestjs/mongoose": "^10.0.4",
     "@nestjs/platform-express": "^10.3.3",
+    "@nestjs/schedule": "^4.0.1",
     "@nestjs/swagger": "^6.1.3",
     "@types/node": "^18.11.9",
     "class-transformer": "^0.5.1",

@@ -4,6 +4,8 @@ import { UserModule } from './modules/user/user.module';
 import { LoggerMiddleware } from './share/middlewares/logger.middleware';
 import { DatabaseModule } from './configs/database/database.module';
 import { RestaurantModule } from './modules/restaurant/restaurant.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TaskDynamicService, TasksService } from './share/tasks/testCronJob.service';
 
 @Module({
   imports: [
@@ -13,7 +15,9 @@ import { RestaurantModule } from './modules/restaurant/restaurant.module';
     DatabaseModule,
     UserModule,
     RestaurantModule,
+    ScheduleModule.forRoot(),
   ],
+  providers: [TasksService, TaskDynamicService],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
