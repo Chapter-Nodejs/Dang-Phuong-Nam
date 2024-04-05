@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsMongoId, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsMongoId, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class QueryParamDto {
   @ApiPropertyOptional()
@@ -10,6 +10,13 @@ export class QueryParamDto {
   @ApiPropertyOptional()
   @IsOptional()
   pageSize: number = 10;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  @IsEnum(['desc', 'asc'])
+  @Transform(({ value }) => value.trim())
+  sortOrder: string = 'asc'; // default sort order asc
 
   @ApiPropertyOptional()
   @IsString()
